@@ -1,0 +1,247 @@
+DROP TABLE IF EXISTS [tmp_date_1];
+DROP TABLE IF EXISTS [tmp_date_2];
+DROP TABLE IF EXISTS [date];
+GO
+DECLARE @StartDate DATE = '1970', @EndDate DATE = '2100' ;
+WITH 
+d1 AS (
+	SELECT [date_en] = CONVERT(DATE, DATEADD(YEAR,-2,@StartDate))
+	UNION ALL 
+	SELECT [date_en] = DATEADD(DAY, 1, [date_en])
+    FROM d1
+    WHERE [date_en] <= DATEADD(YEAR,2,@EndDate)
+) 
+select [date_en]
+into   [tmp_date_1]
+from d1
+OPTION (MAXRECURSION 0)
+GO
+
+
+WITH
+d2 AS (
+	select
+	cast(convert(varchar, [date_en], 112) as int)                   as  [dk_en],
+	[date_en]                                                       as  [date_en],
+	cast(DATEPART(YEAR,[date_en]) as smallint)                      as  [year_en],
+	cast(DATEPART(QUARTER,[date_en]) as smallint)                   as  [quarter_en],
+	case DATEPART(QUARTER, [date_en])
+		when 1 then 'Spring'
+		when 2 then 'Summer'
+		when 3 then 'Autumn'
+		when 4 then 'Winter'
+	end                                                             as  [quarter_name_en],
+	cast(DATEPART(MONTH,[date_en]) as smallint)                     as  [month_en],
+    format([date_en],'MMMM')                                        as  [month_name_en],
+	format([date_en],'MMM')                                         as  [month_abbreviation_en],
+	cast(DATEPART(WEEK, [date_en]) as tinyint)                      as  [week_of_year_en],
+	cast((datediff(week, dateadd(week, datediff(week, 0, dateadd(month, datediff(month, 0, [date_en]), 0)), 0), [date_en])+1) as tinyint) as  [week_of_month_en],
+	cast(DATEPART(WEEKDAY, [date_en]) as tinyint)                   as  [week_day_en],
+	format([date_en],'dddd')                                        as  [week_day_name_en],
+	format([date_en],'ddd')                                         as  [week_day_abbreviation_en],
+	cast(DATEPART(DAY,[date_en]) as tinyint)                        as  [day_of_month_en],
+	cast(DATEPART(DAYOFYEAR,[date_en]) as smallint)                 as  [day_of_year_en],
+
+	cast(format([date_en],'yyyyMMdd','fa-ir') as int)               as  [dk_fa], 
+	format([date_en],'yyyy-MM-dd','fa-ir')                          as  [date_fa], 
+	cast(format([date_en],'yyyy','fa-ir') as smallint)              as  [year_fa],
+	cast(case format([date_en],'MM','fa-ir')
+		when 1 then  1
+		when 2 then  1
+		when 3 then  1
+		when 4 then  2
+		when 5 then  2
+		when 6 then  2
+		when 7 then  3
+		when 8 then  3
+		when 9 then  3
+		when 10 then 4
+		when 11 then 4
+		when 12 then 4
+	end as tinyint)                                                   as  [quarter_fa],
+	case format([date_en],'MM','fa-ir')
+		when 1 then  N'بهار'
+		when 2 then  N'بهار'
+		when 3 then  N'بهار'
+		when 4 then  N'تابستان'
+		when 5 then  N'تابستان'
+		when 6 then  N'تابستان'
+		when 7 then  N'پاییز'
+		when 8 then  N'پاییز'
+		when 9 then  N'پاییز'
+		when 10 then N'زمستان'
+		when 11 then N'زمستان'
+		when 12 then N'زمستان'
+	end                                                              as  [quarter_name_fa],
+	cast(format([date_en],'MM','fa-ir') as tinyint)                  as  [month_fa],
+	case format([date_en],'MM','fa-ir')
+		when 1 then  N'فروردین'
+		when 2 then  N'اردیبهشت'
+		when 3 then  N'خرداد'
+		when 4 then  N'تیر'
+		when 5 then  N'مرداد'
+		when 6 then  N'شهریور'
+		when 7 then  N'مهر'
+		when 8 then  N'آبان'
+		when 9 then  N'آذر'
+		when 10 then N'دی'
+		when 11 then N'بهمن'
+		when 12 then N'اسفند'
+	end                                                              as  [month_name_fa],
+	cast(case format([date_en],'ddd','fa-ir')				         
+		when N'شنبه'     then 1 							         
+		when N'يكشنبه'   then 2								         
+		when N'دوشنبه'   then 3								         
+		when N'سه شنبه'  then 4								         
+		when N'چهارشنبه' then 5								        
+		when N'پنجشنبه'  then 6								        
+		when N'جمعه'     then 7								         
+	end as tinyint)                                                  as  [week_day_fa],
+	format([date_en],'ddd','fa-ir')                                  as  [week_day_name_fa],
+	cast(format([date_en],'dd','fa-ir') as tinyint)                  as  [day_of_month_fa],
+	case format([date_en],'MM','fa-ir')
+		when 1 then  cast(format([date_en],'dd','fa-ir') as tinyint)
+		when 2 then  cast(format([date_en],'dd','fa-ir') as tinyint)+31
+		when 3 then  cast(format([date_en],'dd','fa-ir') as tinyint)+62
+		when 4 then  cast(format([date_en],'dd','fa-ir') as tinyint)+93
+		when 5 then  cast(format([date_en],'dd','fa-ir') as tinyint)+124
+		when 6 then  cast(format([date_en],'dd','fa-ir') as tinyint)+155
+		when 7 then  cast(format([date_en],'dd','fa-ir') as tinyint)+186
+		when 8 then  cast(format([date_en],'dd','fa-ir') as tinyint)+216
+		when 9 then  cast(format([date_en],'dd','fa-ir') as tinyint)+246
+		when 10 then cast(format([date_en],'dd','fa-ir') as tinyint)+276
+		when 11 then cast(format([date_en],'dd','fa-ir') as tinyint)+306
+		when 12 then cast(format([date_en],'dd','fa-ir') as tinyint)+336
+	end                                                              as [day_of_year_fa]
+
+	from [tmp_date_1]
+)
+select *
+into [tmp_date_2]
+from d2
+order by [date_en]
+GO
+
+WITH
+d3 AS (
+	select
+	[dk_en],
+	[date_en],
+	[year_en],
+	[quarter_en],
+	[quarter_name_en],
+	[month_en],
+	[month_name_en],
+	[month_abbreviation_en],
+	[week_of_year_en],
+	[week_of_month_en],
+	[week_day_en],
+	[week_day_name_en],
+	[week_day_abbreviation_en],
+	[day_of_month_en],
+	[day_of_year_en],
+	[dk_fa],
+	[date_fa],
+	[year_fa],
+	[quarter_fa],
+	[quarter_name_fa],
+	[month_fa],
+	[month_name_fa],
+	[week_day_fa],
+	[week_day_name_fa],
+	[day_of_month_fa],
+	[day_of_year_fa],    
+	CEILING(((7-(select top(1) [day_of_month_fa] from [tmp_date_2] dt2 where [week_day_fa] = 7 and dt2.[year_fa] = c.[year_fa] order by dt2.[date_en]))+[day_of_year_fa])/7.0)                                  as [week_of_year_fa],
+	CEILING(((7-(select top(1) [day_of_month_fa] from [tmp_date_2] dt2 where [week_day_fa] = 7 and dt2.[year_fa] = c.[year_fa] and dt2.[month_fa] = c.[month_fa] order by dt2.[date_en]))+[day_of_month_fa])/7.0)        as [week_of_month_fa],
+	row_number() OVER(ORDER BY [dk_en] ASC)							 as [rnk_day]
+from [tmp_date_2] c
+where (year_fa > (select min(year_fa) from [tmp_date_2])) and (year_fa < (select max(year_fa) from [tmp_date_2]))
+)
+ 
+select * 
+into [date]
+from (
+	select
+		[dk_en]                                                                                                          as [dk_en],
+		[date_en]                                                                                                        as [date_en],
+		[year_en]                                                                                                        as [year_en],
+		[quarter_en]                                                                                                     as [quarter_en],
+		[quarter_name_en]                                                                                                as [quarter_name_en],
+		[month_en]                                                                                                       as [month_en],
+		[month_name_en]                                                                                                  as [month_name_en],
+		[month_abbreviation_en]                                                                                          as [month_abbreviation_en],
+		[week_of_year_en]                                                                                                as [week_of_year_en],
+		[week_of_month_en]                                                                                               as [week_of_month_en],
+		[week_day_en]                                                                                                    as [week_day_en],
+		[week_day_name_en]                                                                                               as [week_day_name_en],
+		[week_day_abbreviation_en]                                                                                       as [week_day_abbreviation_en],
+		[day_of_month_en]                                                                                                         as [day_of_month_en],
+		[day_of_year_en]                                                                                                 as [day_of_year_en],
+		[dk_fa]                                                                                                          as [dk_fa],
+		[date_fa]                                                                                                        as [date_fa],
+		[year_fa]                                                                                                        as [year_fa],
+		[quarter_fa]                                                                                                     as [quarter_fa],
+		[quarter_name_fa]                                                                                                as [quarter_name_fa],
+		[month_fa]                                                                                                       as [month_fa],
+		[month_name_fa]                                                                                                  as [month_name_fa],
+		[week_of_year_fa]                                                                                                as [week_of_year_fa],
+		[week_of_month_fa]                                                                                               as [week_of_month_fa],
+		[week_day_fa]                                                                                                    as [week_day_fa],
+		[week_day_name_fa]                                                                                               as [week_day_name_fa],
+		[day_of_month_fa]                                                                                                         as [day_of_month_fa],
+		[day_of_year_fa]                                                                                                 as [day_of_year_fa],
+		[rnk_day]                                                                                                        as [rnk_day],
+		DENSE_RANK() OVER(ORDER BY [year_en] ASC)                                                                        as [rnk_year_en],
+		DENSE_RANK() OVER(ORDER BY [year_fa] ASC)                                                                        as [rnk_year_fa],
+		DENSE_RANK() OVER(ORDER BY [year_en],[quarter_en] ASC)                                                           as [rnk_quarter_en],
+		DENSE_RANK() OVER(ORDER BY [year_fa],[quarter_fa] ASC)                                                           as [rnk_quarter_fa],
+		DENSE_RANK() OVER(ORDER BY [year_en],[month_en] ASC)                                                             as [rnk_month_en],
+		DENSE_RANK() OVER(ORDER BY [year_fa],[month_fa] ASC)                                                             as [rnk_month_fa],
+		CEILING(((7-(select top(1) [rnk_day] from d3 where [week_day_en] = 7 order by [date_en]))+[rnk_day])/7.0)        as [rnk_week_en],
+		CEILING(((7-(select top(1) [rnk_day] from d3 where [week_day_fa] = 7 order by [date_en]))+[rnk_day])/7.0)        as [rnk_week_fa]
+	from d3
+	union all
+	select
+		-1                      as [dk_en],
+		'1970-01-01'            as [date_en],
+		-1                      as [year_en],
+		-1                      as [quarter_en],
+		N'unknown'              as [quarter_name_en],
+		-1                      as [month_en],
+		N'unknown'              as [month_name_en],
+		N'unknown'              as [month_abbreviation_en],
+		-1                      as [week_of_year_en],
+		-1                      as [week_of_month_en],
+		-1                      as [week_day_en],
+		N'unknown'              as [week_day_name_en],
+		N'unknown'              as [week_day_abbreviation_en],
+		-1                      as [day_of_month_en],
+		-1                      as [day_of_year_en],
+		-1                      as [dk_fa],
+		N'نامشخص'              as [date_fa],
+		-1                      as [year_fa],
+		-1                      as [quarter_fa],
+		N'نامشخص'              as [quarter_name_fa],
+		-1                      as [month_fa],
+		N'نامشخص'              as [month_name_fa],
+		-1                      as [week_of_year_fa],
+		-1                      as [week_of_month_fa],
+		-1                      as [week_day_fa],
+		N'نامشخص'              as [week_day_name_fa],
+		-1                      as [day_of_month_fa],
+		-1                      as [day_of_year_fa],
+		-1                      as [rnk_day],
+		-1                      as [rnk_year_en],
+		-1                      as [rnk_year_fa],
+		-1                      as [rnk_quarter_en],
+		-1                      as [rnk_quarter_fa],
+		-1                      as [rnk_month_en],
+		-1                      as [rnk_month_fa],
+		-1                      as [rnk_week_en],
+		-1                      as [rnk_week_fa]
+) table_date
+order by [date_en]
+GO
+DROP TABLE IF EXISTS [tmp_date_1];
+DROP TABLE IF EXISTS [tmp_date_2];
+GO

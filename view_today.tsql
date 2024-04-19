@@ -1,0 +1,83 @@
+CREATE OR ALTER VIEW [vw_today] AS
+SELECT
+[dk_en]                                                                                                   as [dk_en],
+[date_en]                                                                                                 as [date_en],
+[year_en]                                                                                                 as [year_en],
+[quarter_en]                                                                                              as [quarter_en],
+[quarter_name_en]                                                                                         as [quarter_name_en],
+[month_en]                                                                                                as [month_en],
+[month_name_en]                                                                                           as [month_name_en],
+[month_abbreviation_en]                                                                                   as [month_abbreviation_en],
+[week_of_year_en]                                                                                         as [week_of_year_en],
+[week_of_month_en]                                                                                        as [week_of_month_en],
+[week_day_en]                                                                                             as [week_day_en],
+[week_day_name_en]                                                                                        as [week_day_name_en],
+[week_day_abbreviation_en]                                                                                as [week_day_abbreviation_en],
+[day_of_month_en]                                                                                         as [day_of_month_en],
+[day_of_year_en]                                                                                          as [day_of_year_en],
+[dk_fa]                                                                                                   as [dk_fa],
+[date_fa]                                                                                                 as [date_fa],
+[year_fa]                                                                                                 as [year_fa],
+[quarter_fa]                                                                                              as [quarter_fa],
+[quarter_name_fa]                                                                                         as [quarter_name_fa],
+[month_fa]                                                                                                as [month_fa],
+[month_name_fa]                                                                                           as [month_name_fa],
+[week_of_year_fa]                                                                                         as [week_of_year_fa],
+[week_of_month_fa]                                                                                        as [week_of_month_fa],
+[week_day_fa]                                                                                             as [week_day_fa],
+[week_day_name_fa]                                                                                        as [week_day_name_fa],
+[day_of_month_fa]                                                                                         as [day_of_month_fa],
+[day_of_year_fa]                                                                                          as [day_of_year_fa],
+[rnk_day]                                                                                                 as [rnk_day],
+[rnk_year_en]                                                                                             as [rnk_year_en],
+[rnk_year_fa]                                                                                             as [rnk_year_fa],
+[rnk_quarter_en]                                                                                          as [rnk_quarter_en],
+[rnk_quarter_fa]                                                                                          as [rnk_quarter_fa],
+[rnk_month_en]                                                                                            as [rnk_month_en],
+[rnk_month_fa]                                                                                            as [rnk_month_fa],
+[rnk_week_en]                                                                                             as [rnk_week_en],
+[rnk_week_fa]                                                                                             as [rnk_week_fa],
+
+CASE
+	WHEN [date_en] = CAST( GETDATE() AS Date ) THEN 1
+	ELSE 0
+END                                                                                                       as [cc_is_today],
+
+[rnk_day]        - (SELECT [rnk_day]        FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_day],
+[rnk_year_en]    - (SELECT [rnk_year_en]    FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_year_en],
+[rnk_year_fa]    - (SELECT [rnk_year_fa]    FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_year_fa],
+[rnk_quarter_en] - (SELECT [rnk_quarter_en] FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_quarter_en],
+[rnk_quarter_fa] - (SELECT [rnk_quarter_fa] FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_quarter_fa],
+[rnk_month_en]   - (SELECT [rnk_month_en]   FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_month_en],
+[rnk_month_fa]   - (SELECT [rnk_month_fa]   FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_month_fa],
+[rnk_week_en]    - (SELECT [rnk_week_en]    FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_week_en],
+[rnk_week_fa]    - (SELECT [rnk_week_fa]    FROM [date] WHERE [date_en] = CAST( GETDATE() AS Date)) as [cc_dft_week_fa],
+
+CASE 
+	WHEN ([rnk_day] - (SELECT [rnk_day] FROM [date] WHERE [date_en] = CAST(GETDATE() AS Date))) BETWEEN -9 AND 0 THEN 1
+	ELSE 0
+END                                                                                                       as [cc_last_10_day],
+CASE 
+	WHEN ([rnk_day] - (SELECT [rnk_day] FROM [date] WHERE [date_en] = CAST(GETDATE() AS Date))) BETWEEN -29 AND 0 THEN 1
+	ELSE 0
+END                                                                                                       as [cc_last_30_day],
+CASE 
+	WHEN ([rnk_day] - (SELECT [rnk_day] FROM [date] WHERE [date_en] = CAST(GETDATE() AS Date))) BETWEEN -59 AND 0 THEN 1
+	ELSE 0
+END                                                                                                       as [cc_last_60_day],
+CASE 
+	WHEN ([rnk_day] - (SELECT [rnk_day] FROM [date] WHERE [date_en] = CAST(GETDATE() AS Date))) BETWEEN -89 AND 0 THEN 1
+	ELSE 0
+END                                                                                                       as [cc_last_90_day],
+CASE 
+	WHEN ([rnk_day] - (SELECT [rnk_day] FROM [date] WHERE [date_en] = CAST(GETDATE() AS Date))) BETWEEN -179 AND 0 THEN 1
+	ELSE 0
+END                                                                                                       as [cc_last_180_day]
+
+FROM [date]
+
+
+
+
+
+
